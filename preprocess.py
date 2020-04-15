@@ -1,16 +1,7 @@
 import pandas as pd
 
 
-# Read from JHU Dataset
-df = pd.read_csv("./COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
-
-# Remove Province/State, Latitude and Longitude columns
-df = df.drop(columns=["Province/State", "Lat", "Long"])
-
-# Add rows by Country/Region
-df = df.groupby('Country/Region').sum().reset_index()
-
-# Add Image Column
+# Country codes
 country_to_key = {
     "Afghanistan": "af",
     "Albania": "al",
@@ -198,8 +189,24 @@ country_to_key = {
     "Zambia": "zm",
     "Zimbabwe": "zw",
 }
-images = [f"https://www.countryflags.io/{country_to_key[country]}/flat/64.png" if country_to_key[country] else "" for country in df['Country/Region'].tolist()]
-df["Image"] = images
+
+
+# Read from JHU Dataset
+confirmed_df = pd.read_csv("./COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+deaths_df = pd.read_csv("./COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+
+# Remove Province/State, Latitude and Longitude columns
+confirmed_df = confirmed_df.drop(columns=["Province/State", "Lat", "Long"])
+deaths_df = deaths_df.drop(columns=["Province/State", "Lat", "Long"])
+
+# Add rows by Country/Region
+confirmed_df = confirmed_df.groupby('Country/Region').sum().reset_index()
+deaths_df = deaths_df.groupby('Country/Region').sum().reset_index()
+
+# Add Image Column
+confirmed_df["Image"] = [f"https://www.countryflags.io/{country_to_key[country]}/flat/64.png" if country_to_key[country] else "" for country in confirmed_df['Country/Region'].tolist()]
+deaths_df["Image"] = [f"https://www.countryflags.io/{country_to_key[country]}/flat/64.png" if country_to_key[country] else "" for country in deaths_df['Country/Region'].tolist()]
 
 # Output to CSV
-df.to_csv("./output.csv")
+confirmed_df.to_csv("./confirmed.csv")
+deaths_df.to_csv("./deaths.csv")
